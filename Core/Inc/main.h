@@ -72,6 +72,8 @@ void SignalError(void);
 #define CABEL11_I_Pin GPIO_PIN_2
 #define CABEL11_I_GPIO_Port GPIOC
 #define CABEL11_I_EXTI_IRQn EXTI2_3_IRQn
+#define GREEN_LED_Pin GPIO_PIN_1
+#define GREEN_LED_GPIO_Port GPIOA
 #define SPEAKER_Pin GPIO_PIN_2
 #define SPEAKER_GPIO_Port GPIOA
 #define RED_LED_Pin GPIO_PIN_3
