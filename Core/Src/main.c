@@ -476,6 +476,8 @@ void LedOffAll(void)
 	HAL_GPIO_WritePin(GPIOA, SPEAKER_Pin|RED_LED_Pin|CABEL1_O_Pin|CABEL2_O_Pin
 	                         |CABEL3_O_Pin|CABEL4_O_Pin|LED11_Pin, GPIO_PIN_RESET);
 
+	HAL_GPIO_WritePin(GPIOA, GREEN_LED_Pin, GPIO_PIN_RESET);
+
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOC, CABEL5_O_Pin|CABEL6_O_Pin|LED10_Pin|LED9_Pin
 	                          |LED8_Pin, GPIO_PIN_RESET);
