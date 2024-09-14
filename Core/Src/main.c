@@ -255,20 +255,25 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SPEAKER_Pin CABEL5_O_Pin CABEL4_O_Pin CABEL3_O_Pin
-                           CABEL2_O_Pin */
-  GPIO_InitStruct.Pin = SPEAKER_Pin|CABEL5_O_Pin|CABEL4_O_Pin|CABEL3_O_Pin
-                          |CABEL2_O_Pin;
+  /*Configure GPIO pin : SPEAKER_Pin */
+  GPIO_InitStruct.Pin = SPEAKER_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(SPEAKER_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : BUTTON_Pin */
   GPIO_InitStruct.Pin = BUTTON_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(BUTTON_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : CABEL5_O_Pin CABEL4_O_Pin CABEL3_O_Pin CABEL2_O_Pin */
+  GPIO_InitStruct.Pin = CABEL5_O_Pin|CABEL4_O_Pin|CABEL3_O_Pin|CABEL2_O_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : CABEL1_O_Pin CABEL6_O_Pin */
   GPIO_InitStruct.Pin = CABEL1_O_Pin|CABEL6_O_Pin;
@@ -363,13 +368,26 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   switch(GPIO_Pin)
   {
   	  case BUTTON_Pin:
+  		for(int i=0; i<500; i++)
+  		{
+  			if(HAL_GPIO_ReadPin(BUTTON_GPIO_Port, BUTTON_Pin) == 0)
+  			{
+
+  			}else
+  			{
+  				return;
+  			}
+  		}
+
   		  if(TestState == STOP)
   		  {
+
   			TestState = START;
   			CabelTestStart();
   		  }
   		  else if(TestState == START)
   		  {
+  			for(int i=0; i<600000; i++);
   			TestState = STOP;
   			LedOffAll();
   		  }
