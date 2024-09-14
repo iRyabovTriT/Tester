@@ -39,6 +39,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+RTC_HandleTypeDef hrtc;
 
 /* USER CODE BEGIN PV */
 
@@ -47,6 +48,7 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_RTC_Init(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -54,7 +56,12 @@ static void MX_NVIC_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+uint8_t StartTest = 0;
+GPIO_TypeDef* PortLed[] = {GPIOB, GPIOB, GPIOB, GPIOB, GPIOB, GPIOB, GPIOD, GPIOC, GPIOC, GPIOC, GPIOA};
+uint16_t PinLed[] = {LED1_Pin, LED2_Pin, LED3_Pin, LED4_Pin, LED5_Pin, LED6_Pin, LED7_Pin, LED8_Pin, LED9_Pin, LED10_Pin, LED11_Pin};
+static uint8_t ErrorTest = 0;
 
+static uint16_t ResPinTest[11] = {0,0,0,0,0,0,0,0,0,0,0};
 /* USER CODE END 0 */
 
 /**
@@ -85,6 +92,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_RTC_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
@@ -110,12 +118,14 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
@@ -137,6 +147,12 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC;
+  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
 /**
@@ -145,9 +161,6 @@ void SystemClock_Config(void)
   */
 static void MX_NVIC_Init(void)
 {
-  /* RCC_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(RCC_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(RCC_IRQn);
   /* EXTI0_1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(EXTI0_1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
@@ -157,6 +170,44 @@ static void MX_NVIC_Init(void)
   /* EXTI4_15_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+  /* RCC_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(RCC_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(RCC_IRQn);
+}
+
+/**
+  * @brief RTC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_RTC_Init(void)
+{
+
+  /* USER CODE BEGIN RTC_Init 0 */
+
+  /* USER CODE END RTC_Init 0 */
+
+  /* USER CODE BEGIN RTC_Init 1 */
+
+  /* USER CODE END RTC_Init 1 */
+
+  /** Initialize RTC Only
+  */
+  hrtc.Instance = RTC;
+  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+  hrtc.Init.AsynchPrediv = 127;
+  hrtc.Init.SynchPrediv = 255;
+  hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+  hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
+  hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
+  if (HAL_RTC_Init(&hrtc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RTC_Init 2 */
+
+  /* USER CODE END RTC_Init 2 */
+
 }
 
 /**
@@ -176,11 +227,11 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GREEN_LED_Pin|SPEAKER_Pin|RED_LED_Pin|CABEL1_O_Pin
-                          |CABEL2_O_Pin|CABEL3_O_Pin|CABEL4_O_Pin|LED11_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GREEN_LED_Pin|SPEAKER_Pin|RED_LED_Pin|CABEL5_O_Pin
+                          |CABEL4_O_Pin|CABEL3_O_Pin|CABEL2_O_Pin|LED11_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, CABEL5_O_Pin|CABEL6_O_Pin|LED10_Pin|LED9_Pin
+  HAL_GPIO_WritePin(GPIOC, CABEL1_O_Pin|CABEL6_O_Pin|LED10_Pin|LED9_Pin
                           |LED8_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -200,27 +251,27 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pins : GREEN_LED_Pin RED_LED_Pin */
   GPIO_InitStruct.Pin = GREEN_LED_Pin|RED_LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SPEAKER_Pin CABEL1_O_Pin CABEL2_O_Pin CABEL3_O_Pin
-                           CABEL4_O_Pin LED11_Pin */
-  GPIO_InitStruct.Pin = SPEAKER_Pin|CABEL1_O_Pin|CABEL2_O_Pin|CABEL3_O_Pin
-                          |CABEL4_O_Pin|LED11_Pin;
+  /*Configure GPIO pins : SPEAKER_Pin CABEL5_O_Pin CABEL4_O_Pin CABEL3_O_Pin
+                           CABEL2_O_Pin */
+  GPIO_InitStruct.Pin = SPEAKER_Pin|CABEL5_O_Pin|CABEL4_O_Pin|CABEL3_O_Pin
+                          |CABEL2_O_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : BUTTON_Pin CABEL2_I_Pin CABEL1_I_Pin */
-  GPIO_InitStruct.Pin = BUTTON_Pin|CABEL2_I_Pin|CABEL1_I_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+  /*Configure GPIO pin : BUTTON_Pin */
+  GPIO_InitStruct.Pin = BUTTON_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(BUTTON_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CABEL5_O_Pin CABEL6_O_Pin */
-  GPIO_InitStruct.Pin = CABEL5_O_Pin|CABEL6_O_Pin;
+  /*Configure GPIO pins : CABEL1_O_Pin CABEL6_O_Pin */
+  GPIO_InitStruct.Pin = CABEL1_O_Pin|CABEL6_O_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -247,17 +298,30 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : CABEL2_I_Pin CABEL1_I_Pin */
+  GPIO_InitStruct.Pin = CABEL2_I_Pin|CABEL1_I_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LED11_Pin */
+  GPIO_InitStruct.Pin = LED11_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED11_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pins : LED10_Pin LED9_Pin LED8_Pin */
   GPIO_InitStruct.Pin = LED10_Pin|LED9_Pin|LED8_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LED7_Pin */
   GPIO_InitStruct.Pin = LED7_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(LED7_GPIO_Port, &GPIO_InitStruct);
 
@@ -266,7 +330,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pin = LED6_Pin|LED5_Pin|LED4_Pin|LED3_Pin
                           |LED2_Pin|LED1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
@@ -289,6 +353,8 @@ void TestCase(void)
 	}else return;
 }
 
+static uint8_t wait = 0;
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
   /* Prevent unused argument(s) compilation warning */
@@ -309,47 +375,55 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   		  }
   		  break;
   	  case CABEL1_I_Pin:
-  		  TestRes = SUCCESS;
+  		  ResPinTest[0] = 1;
   		  LedOn(LED1_GPIO_Port, LED1_Pin);
   		  break;
   	  case CABEL2_I_Pin:
-  		  TestRes = SUCCESS;
+  		  //TestRes = SUCCESS;
+  		  ResPinTest[1] = 1;
   		  LedOn(LED2_GPIO_Port, LED2_Pin);
   		  break;
   	  case CABEL3_I_Pin:
-  		  TestRes = SUCCESS;
-  	  	  LedOn(LED3_GPIO_Port, LED3_Pin);
+  		  //TestRes = SUCCESS;
+  		  ResPinTest[2] = 1;
+  		  LedOn(LED3_GPIO_Port, LED3_Pin);
   	  	  break;
   	  case CABEL4_I_Pin:
-  		  TestRes = SUCCESS;
+  		  //TestRes = SUCCESS;
+  		  ResPinTest[3] = 1;
   		  LedOn(LED4_GPIO_Port, LED4_Pin);
   		  break;
   	  case CABEL5_I_Pin:
-  		  TestRes = SUCCESS;
+  		  //TestRes = SUCCESS;
+  		  ResPinTest[4] = 1;
   		  LedOn(LED5_GPIO_Port, LED5_Pin);
   		  break;
   	  case CABEL6_I_Pin:
-  		  TestRes = SUCCESS;
+  		  //TestRes = SUCCESS;
   		  LedOn(LED6_GPIO_Port, LED6_Pin);
+  		  ResPinTest[5] = 1;
   		  break;
   	  case CABEL7_I_Pin:
-  		  TestRes = SUCCESS;
+  		  //TestRes = SUCCESS;
+  		  ResPinTest[6] = 1;
   		  LedOn(LED7_GPIO_Port, LED7_Pin);
   		  break;
   	  case CABEL8_I_Pin:
-  		  TestRes = SUCCESS;
+  		  ResPinTest[7] = 1;
   		  LedOn(LED8_GPIO_Port, LED8_Pin);
   		  break;
   	  case CABEL9_I_Pin:
-  		  TestRes = SUCCESS;
+  		  ResPinTest[8] = 1;
   		  LedOn(LED9_GPIO_Port, LED9_Pin);
   		  break;
   	  case CABEL10_I_Pin:
-  		  TestRes = SUCCESS;
+  		  //TestRes = SUCCESS;
+  		  ResPinTest[9] = 1;
   		  LedOn(LED10_GPIO_Port, LED10_Pin);
   		  break;
   	  case CABEL11_I_Pin:
-  		  TestRes = SUCCESS;
+  		  //TestRes = SUCCESS;
+  		  ResPinTest[10] = 1;
   		  LedOn(LED11_GPIO_Port, LED11_Pin);
   		  break;
   	  default:
@@ -359,43 +433,32 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 }
 
-#define Cabel1 CABEL1_O_GPIO_Port, CABEL1_O_Pin
-#define Cabel2 CABEL2_O_GPIO_Port, CABEL2_O_Pin
-#define Cabel3 CABEL3_O_GPIO_Port, CABEL3_O_Pin
-#define Cabel4 CABEL4_O_GPIO_Port, CABEL4_O_Pin
-#define Cabel5 CABEL5_O_GPIO_Port, CABEL5_O_Pin
-#define Cabel6 CABEL6_O_GPIO_Port, CABEL6_O_Pin
-#define Cabel7 CABEL7_O_GPIO_Port, CABEL7_O_Pin
-#define Cabel8 CABEL8_O_GPIO_Port, CABEL8_O_Pin
-#define Cabel9 CABEL9_O_GPIO_Port, CABEL9_O_Pin
-#define Cabel10 CABEL10_O_GPIO_Port, CABEL10_O_Pin
-#define Cabel11 CABEL11_O_GPIO_Port, CABEL11_O_Pin
-
 const uint16_t Cabel_Pin[] = {CABEL1_O_Pin, CABEL2_O_Pin, CABEL3_O_Pin, CABEL4_O_Pin, CABEL5_O_Pin, CABEL6_O_Pin, CABEL7_O_Pin, CABEL8_O_Pin, CABEL9_O_Pin, CABEL10_O_Pin, CABEL11_O_Pin};
-static uint16_t ResPinTest[11] = {0};
-static uint8_t ErrorTest = 0;
 
-void Delay(uint16_t value)
+
+void Delay(uint32_t value)
 {
-	while(value--);
+	while(value > 0)
+	{
+		value--;
+	}
 }
 
 void CabelTestStart()
 {
+	StartTest = 0;
+
 	for(int i = 0; i < 11; i++)
 	{
+		wait = 1;
 		HAL_GPIO_WritePin(GetPort(i), Cabel_Pin[i], GPIO_PIN_SET);
-		Delay(0xffff);
-		if(TestRes == ERROR)
-		{
-			ResPinTest[i] = 0;
-		}else
-		{
-			ResPinTest[i] = 1;
-		}
+		Delay(0xffffff);
 		HAL_GPIO_WritePin(GetPort(i), Cabel_Pin[i], GPIO_PIN_RESET);
+		if(TestRes == SUCCESS)
+		{
+			//ResPinTest[i] = SUCCESS;
+		}
 		TestRes = ERROR;
-		Delay(0xffff);
 	}
 
 	for(int i = 0; i < 11; i++)
@@ -405,8 +468,7 @@ void CabelTestStart()
 			ErrorTest = 1;
 		}
 	}
-
-	if(ErrorTest)
+	if(ErrorTest == 1)
 	{
 		SignalError();
 		ErrorTest = 0;
@@ -414,8 +476,16 @@ void CabelTestStart()
 	{
 		LedOn(GREEN_LED_GPIO_Port, GREEN_LED_Pin);
 	}
+	StartTest = 0;
+	ErrorTest = 0;
+	for(int i = 0; i < 11; i++)
+	{
+	  	ResPinTest[i] = ERROR;
+	}
 
 }
+
+
 
 GPIO_TypeDef* GetPort(uint16_t GPIO_Pin)
 {
@@ -462,42 +532,45 @@ GPIO_TypeDef* GetPort(uint16_t GPIO_Pin)
 
 void LedOn(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
 {
-	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_RESET);
 }
 
 void LedOff(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
 {
-	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOx, GPIO_Pin, GPIO_PIN_SET);
 }
 
 void LedOffAll(void)
 {
 	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOA, SPEAKER_Pin|RED_LED_Pin|CABEL1_O_Pin|CABEL2_O_Pin
-	                         |CABEL3_O_Pin|CABEL4_O_Pin|LED11_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, RED_LED_Pin|LED11_Pin, GPIO_PIN_SET);
 
-	HAL_GPIO_WritePin(GPIOA, GREEN_LED_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, SPEAKER_Pin|CABEL1_O_Pin|CABEL2_O_Pin
+		                         |CABEL3_O_Pin|CABEL4_O_Pin, GPIO_PIN_RESET);
 
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOC, CABEL5_O_Pin|CABEL6_O_Pin|LED10_Pin|LED9_Pin
-	                          |LED8_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, GREEN_LED_Pin, GPIO_PIN_SET);
 
 	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOC, LED10_Pin|LED9_Pin|LED8_Pin, GPIO_PIN_SET);
+
+	HAL_GPIO_WritePin(GPIOC, CABEL5_O_Pin|CABEL6_O_Pin, GPIO_PIN_RESET);
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOB, LED6_Pin|LED5_Pin|LED4_Pin|LED3_Pin|LED2_Pin|LED1_Pin, GPIO_PIN_SET);
+
 	HAL_GPIO_WritePin(GPIOB, CABEL7_O_Pin|CABEL8_O_Pin|CABEL9_O_Pin|CABEL10_O_Pin
-	                         |CABEL11_O_Pin|LED6_Pin|LED5_Pin|LED4_Pin
-	                          |LED3_Pin|LED2_Pin|LED1_Pin, GPIO_PIN_RESET);
-
+		                         |CABEL11_O_Pin, GPIO_PIN_RESET);
 	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(LED7_GPIO_Port, LED7_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LED7_GPIO_Port, LED7_Pin, GPIO_PIN_SET);
 }
 
 void SignalError(void)
 {
-	HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_RESET);
 
 	HAL_GPIO_WritePin(SPEAKER_GPIO_Port, SPEAKER_Pin, GPIO_PIN_SET);
 
 	Delay(0xffff);
+
 
 	HAL_GPIO_WritePin(SPEAKER_GPIO_Port, SPEAKER_Pin, GPIO_PIN_RESET);
 
@@ -512,7 +585,7 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
+  //__disable_irq();
   while (1)
   {
   }
