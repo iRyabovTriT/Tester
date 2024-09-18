@@ -52,6 +52,9 @@ default.size.stdout \
 OBJDUMP_LIST += \
 tester.list \
 
+OBJCOPY_HEX += \
+tester.hex \
+
 
 # All Target
 all: main-build
@@ -60,8 +63,8 @@ all: main-build
 main-build: tester.elf secondary-outputs
 
 # Tool invocations
-tester.elf tester.map: $(OBJS) $(USER_OBJS) C:\Users\iryab\STM32CubeIDE\workspace_1.11.0\tester\STM32F030R8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "tester.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0 -T"C:\Users\iryab\STM32CubeIDE\workspace_1.11.0\tester\STM32F030R8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="tester.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+tester.elf tester.map: $(OBJS) $(USER_OBJS) C:\Users\iryab\STM32CubeIDE\workspace_1.11.0\tester\Tester\STM32F030R8TX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "tester.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0 -T"C:\Users\iryab\STM32CubeIDE\workspace_1.11.0\tester\Tester\STM32F030R8TX_FLASH.ld" --specs=nosys.specs -Wl,-Map="tester.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -75,12 +78,17 @@ tester.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+tester.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "tester.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
-	-$(RM) default.size.stdout tester.elf tester.list tester.map
+	-$(RM) default.size.stdout tester.elf tester.hex tester.list tester.map
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'

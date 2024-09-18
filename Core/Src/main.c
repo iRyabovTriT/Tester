@@ -41,6 +41,9 @@
 /* Private variables ---------------------------------------------------------*/
 RTC_HandleTypeDef hrtc;
 
+TIM_HandleTypeDef htim6;
+TIM_HandleTypeDef htim14;
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -49,6 +52,8 @@ RTC_HandleTypeDef hrtc;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_RTC_Init(void);
+static void MX_TIM6_Init(void);
+static void MX_TIM14_Init(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -62,6 +67,10 @@ uint16_t PinLed[] = {LED1_Pin, LED2_Pin, LED3_Pin, LED4_Pin, LED5_Pin, LED6_Pin,
 static uint8_t ErrorTest = 0;
 
 static uint16_t ResPinTest[11] = {0,0,0,0,0,0,0,0,0,0,0};
+const uint16_t Cabel_Pin[] = {CABEL1_O_Pin, CABEL2_O_Pin, CABEL3_O_Pin, CABEL4_O_Pin, CABEL5_O_Pin, CABEL6_O_Pin, CABEL7_O_Pin, CABEL8_O_Pin, CABEL9_O_Pin, CABEL10_O_Pin, CABEL11_O_Pin};
+static int count = 0;
+
+static int arrayCount = 0;
 /* USER CODE END 0 */
 
 /**
@@ -71,7 +80,6 @@ static uint16_t ResPinTest[11] = {0,0,0,0,0,0,0,0,0,0,0};
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -87,12 +95,13 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_RTC_Init();
+  MX_TIM6_Init();
+  MX_TIM14_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
@@ -106,6 +115,57 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+	  if(arrayCount < 11)
+	  {
+		  HAL_GPIO_WritePin(GetPort(arrayCount), Cabel_Pin[arrayCount], GPIO_PIN_SET);
+		  //HAL_GPIO_TogglePin(RED_LED_GPIO_Port, RED_LED_Pin);
+
+		  HAL_Delay(100);
+
+		  HAL_GPIO_WritePin(GetPort(arrayCount), Cabel_Pin[arrayCount], GPIO_PIN_RESET);
+
+		  arrayCount++;
+		  count++;
+	  }
+
+	  if(arrayCount == 11)
+	  {
+		  for(int i = 0; i < 11; i++)
+		  {
+			  if(ResPinTest[i] == 0)
+			  {
+				  ErrorTest = 1;
+			  }
+		  }
+		  if(ErrorTest)
+		  {
+			  arrayCount++;
+
+			  HAL_GPIO_WritePin(RED_LED_GPIO_Port, RED_LED_Pin, GPIO_PIN_RESET);
+
+			  for(int i = 0; i < 3; i++)
+			  {
+				  HAL_GPIO_WritePin(SPEAKER_GPIO_Port, SPEAKER_Pin, GPIO_PIN_SET);
+				  if(i == 2)
+				  {
+					  HAL_Delay(1000);
+				  }else
+				  {
+					  HAL_Delay(500);
+				  }
+
+				  HAL_GPIO_WritePin(SPEAKER_GPIO_Port, SPEAKER_Pin, GPIO_PIN_RESET);
+				  HAL_Delay(500);
+			  }
+		  }
+		  else
+		  {
+			  HAL_GPIO_WritePin(GREEN_LED_GPIO_Port, GREEN_LED_Pin, GPIO_PIN_RESET);
+		  }
+
+	  }
+
   }
   /* USER CODE END 3 */
 }
@@ -170,6 +230,9 @@ static void MX_NVIC_Init(void)
   /* EXTI4_15_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+  /* TIM6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(TIM6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(TIM6_IRQn);
   /* RCC_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(RCC_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(RCC_IRQn);
@@ -207,6 +270,67 @@ static void MX_RTC_Init(void)
   /* USER CODE BEGIN RTC_Init 2 */
 
   /* USER CODE END RTC_Init 2 */
+
+}
+
+/**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 359;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 10000;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+  /* USER CODE END TIM6_Init 2 */
+
+}
+
+/**
+  * @brief TIM14 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM14_Init(void)
+{
+
+  /* USER CODE BEGIN TIM14_Init 0 */
+
+  /* USER CODE END TIM14_Init 0 */
+
+  /* USER CODE BEGIN TIM14_Init 1 */
+
+  /* USER CODE END TIM14_Init 1 */
+  htim14.Instance = TIM14;
+  htim14.Init.Prescaler = 0;
+  htim14.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim14.Init.Period = 65535;
+  htim14.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim14.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim14) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM14_Init 2 */
+
+  /* USER CODE END TIM14_Init 2 */
 
 }
 
@@ -393,56 +517,81 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   		  }
   		  break;
   	  case CABEL1_I_Pin:
-  		  ResPinTest[0] = 1;
-  		  LedOn(LED1_GPIO_Port, LED1_Pin);
+  		  if(count == 0)
+  		  {
+  			  ResPinTest[0] = 1;
+  			  LedOn(LED1_GPIO_Port, LED1_Pin);
+  		  }
   		  break;
   	  case CABEL2_I_Pin:
-  		  //TestRes = SUCCESS;
-  		  ResPinTest[1] = 1;
-  		  LedOn(LED2_GPIO_Port, LED2_Pin);
+  		  if(count == 1)
+  		  {
+  			  ResPinTest[1] = 1;
+  			  LedOn(LED2_GPIO_Port, LED2_Pin);
+  		  }
   		  break;
   	  case CABEL3_I_Pin:
-  		  //TestRes = SUCCESS;
-  		  ResPinTest[2] = 1;
-  		  LedOn(LED3_GPIO_Port, LED3_Pin);
+  		  if(count == 2)
+  		  {
+  			  ResPinTest[2] = 1;
+  			  LedOn(LED3_GPIO_Port, LED3_Pin);
+  		  }
   	  	  break;
   	  case CABEL4_I_Pin:
-  		  //TestRes = SUCCESS;
-  		  ResPinTest[3] = 1;
-  		  LedOn(LED4_GPIO_Port, LED4_Pin);
+  		  if(count == 3)
+  		  {
+  			  ResPinTest[3] = 1;
+  			  LedOn(LED4_GPIO_Port, LED4_Pin);
+  		  }
   		  break;
   	  case CABEL5_I_Pin:
-  		  //TestRes = SUCCESS;
-  		  ResPinTest[4] = 1;
-  		  LedOn(LED5_GPIO_Port, LED5_Pin);
+  		  if(count == 4)
+  		  {
+  			  ResPinTest[4] = 1;
+  			  LedOn(LED5_GPIO_Port, LED5_Pin);
+  		  }
   		  break;
   	  case CABEL6_I_Pin:
-  		  //TestRes = SUCCESS;
-  		  LedOn(LED6_GPIO_Port, LED6_Pin);
-  		  ResPinTest[5] = 1;
+  		  if(count == 5)
+  		  {
+  			  LedOn(LED6_GPIO_Port, LED6_Pin);
+  			  ResPinTest[5] = 1;
+  		  }
   		  break;
   	  case CABEL7_I_Pin:
-  		  //TestRes = SUCCESS;
-  		  ResPinTest[6] = 1;
-  		  LedOn(LED7_GPIO_Port, LED7_Pin);
+  		  if(count == 6)
+  		  {
+  			  ResPinTest[6] = 1;
+  			  LedOn(LED7_GPIO_Port, LED7_Pin);
+  		  }
   		  break;
   	  case CABEL8_I_Pin:
-  		  ResPinTest[7] = 1;
-  		  LedOn(LED8_GPIO_Port, LED8_Pin);
+  		  if(count == 7)
+  		  {
+  			  ResPinTest[7] = 1;
+  			  LedOn(LED8_GPIO_Port, LED8_Pin);
+  		  }
   		  break;
   	  case CABEL9_I_Pin:
-  		  ResPinTest[8] = 1;
-  		  LedOn(LED9_GPIO_Port, LED9_Pin);
+  		  if(count == 8)
+  		  {
+  			  ResPinTest[8] = 1;
+  			  LedOn(LED9_GPIO_Port, LED9_Pin);
+  		  }
   		  break;
   	  case CABEL10_I_Pin:
-  		  //TestRes = SUCCESS;
-  		  ResPinTest[9] = 1;
-  		  LedOn(LED10_GPIO_Port, LED10_Pin);
+  		  if(count == 9)
+  		  {
+  			  ResPinTest[9] = 1;
+  			  LedOn(LED10_GPIO_Port, LED10_Pin);
+  		  }
   		  break;
   	  case CABEL11_I_Pin:
-  		  //TestRes = SUCCESS;
-  		  ResPinTest[10] = 1;
-  		  LedOn(LED11_GPIO_Port, LED11_Pin);
+  		  if(count == 10)
+  		  {
+  			  ResPinTest[10] = 1;
+  			  LedOn(LED11_GPIO_Port, LED11_Pin);
+  		  }
   		  break;
   	  default:
   		  TestRes = ERROR;
@@ -451,7 +600,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 }
 
-const uint16_t Cabel_Pin[] = {CABEL1_O_Pin, CABEL2_O_Pin, CABEL3_O_Pin, CABEL4_O_Pin, CABEL5_O_Pin, CABEL6_O_Pin, CABEL7_O_Pin, CABEL8_O_Pin, CABEL9_O_Pin, CABEL10_O_Pin, CABEL11_O_Pin};
 
 
 void Delay(uint32_t value)
