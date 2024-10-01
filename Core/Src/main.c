@@ -124,7 +124,7 @@ int main(void)
 		  HAL_GPIO_WritePin(GetPort(arrayCount), Cabel_Pin[arrayCount], GPIO_PIN_SET);
 		  //HAL_GPIO_TogglePin(RED_LED_GPIO_Port, RED_LED_Pin);
 
-		  HAL_Delay(100);
+		  HAL_Delay(150);
 
 		  HAL_GPIO_WritePin(GetPort(arrayCount), Cabel_Pin[arrayCount], GPIO_PIN_RESET);
 
@@ -408,11 +408,11 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, GREEN_LED_Pin|RED_LED_Pin|LED7_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, SPEAKER_Pin|CABEL9_O_Pin|CABEL11_O_Pin|CABEL8_O_Pin
+  HAL_GPIO_WritePin(GPIOA, SPEAKER_Pin|CABEL9_O_Pin|CABEL10_O_Pin|CABEL8_O_Pin
                           |CABEL6_O_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, CABEL10_O_Pin|CABEL2_O_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, CABEL11_O_Pin|CABEL2_O_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, CABEL4_O_Pin|CABEL5_O_Pin|CABEL1_O_Pin|CABEL3_O_Pin
@@ -441,9 +441,9 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SPEAKER_Pin CABEL9_O_Pin CABEL11_O_Pin CABEL8_O_Pin
+  /*Configure GPIO pins : SPEAKER_Pin CABEL9_O_Pin CABEL10_O_Pin CABEL8_O_Pin
                            CABEL6_O_Pin */
-  GPIO_InitStruct.Pin = SPEAKER_Pin|CABEL9_O_Pin|CABEL11_O_Pin|CABEL8_O_Pin
+  GPIO_InitStruct.Pin = SPEAKER_Pin|CABEL9_O_Pin|CABEL10_O_Pin|CABEL8_O_Pin
                           |CABEL6_O_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
@@ -456,8 +456,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(BUTTON_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CABEL10_O_Pin CABEL2_O_Pin */
-  GPIO_InitStruct.Pin = CABEL10_O_Pin|CABEL2_O_Pin;
+  /*Configure GPIO pins : CABEL11_O_Pin CABEL2_O_Pin */
+  GPIO_InitStruct.Pin = CABEL11_O_Pin|CABEL2_O_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -478,14 +478,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CABEL9_I_Pin CABEL11_I_Pin CABEL8_I_Pin */
-  GPIO_InitStruct.Pin = CABEL9_I_Pin|CABEL11_I_Pin|CABEL8_I_Pin;
+  /*Configure GPIO pins : CABEL9_I_Pin CABEL10_I_Pin CABEL8_I_Pin */
+  GPIO_InitStruct.Pin = CABEL9_I_Pin|CABEL10_I_Pin|CABEL8_I_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CABEL6_I_Pin CABEL10_I_Pin */
-  GPIO_InitStruct.Pin = CABEL6_I_Pin|CABEL10_I_Pin;
+  /*Configure GPIO pins : CABEL6_I_Pin CABEL11_I_Pin */
+  GPIO_InitStruct.Pin = CABEL6_I_Pin|CABEL11_I_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
@@ -593,8 +593,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   		  break;
   	  case CABEL6_I_Pin:
   		  countCabelInter++;
-  		  countCabelInterIndivid++;
-  		  if(count == 5 && (countCabelInter == 1 || countCabelInter == 2) && countCabelInterIndivid < 3)
+  		  if(count == 5 && (countCabelInter == 1 || countCabelInter == 2))
   		  {
   			  LedOn(LED6_GPIO_Port, LED6_Pin);
   			  ResPinTest[5] = 1;
@@ -602,8 +601,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   		  break;
   	  case CABEL7_I_Pin:
   		  countCabelInter++;
-  		  countCabelInterIndivid++;
-  		  if(count == 6 && (countCabelInter == 1 || countCabelInter == 2) && countCabelInterIndivid < 3)
+  		  if(count == 6 && (countCabelInter == 1 || countCabelInter == 2))
   		  {
   			  ResPinTest[6] = 1;
   			  LedOn(LED7_GPIO_Port, LED7_Pin);
