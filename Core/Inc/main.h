@@ -64,6 +64,8 @@ void SignalError(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define LED8_Pin GPIO_PIN_13
+#define LED8_GPIO_Port GPIOC
 #define CABEL1_I_Pin GPIO_PIN_0
 #define CABEL1_I_GPIO_Port GPIOC
 #define CABEL1_I_EXTI_IRQn EXTI0_1_IRQn
@@ -144,12 +146,10 @@ void SignalError(void);
 #define LED9_GPIO_Port GPIOB
 #define LED10_Pin GPIO_PIN_5
 #define LED10_GPIO_Port GPIOB
-#define LED8_Pin GPIO_PIN_6
-#define LED8_GPIO_Port GPIOB
-#define LED6_Pin GPIO_PIN_7
-#define LED6_GPIO_Port GPIOB
 #define LED11_Pin GPIO_PIN_8
 #define LED11_GPIO_Port GPIOB
+#define LED6_Pin GPIO_PIN_9
+#define LED6_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
